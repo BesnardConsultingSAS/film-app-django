@@ -1,14 +1,16 @@
 import pytest
 
 from film.models import Film
+from film.tests.film_factory import FilmFactory
 from producer.models import Producer
+from producer.tests.producer_factory import ProducerFactory
 
 
 @pytest.mark.django_db
 class TestFilmViews:
     def test_create_film(self, client) -> None:
         assert Film.objects.count() == 0
-        producer: Producer = Producer.objects.create(name="Ben", email="ben@gmail.com")
+        producer: Producer = ProducerFactory()
         response = client.post(
             "/films/",
             {"title": "Harry Potter", "year_published": 2000, "producer": producer.id},
@@ -18,10 +20,7 @@ class TestFilmViews:
 
     def test_list_films(self, client) -> None:
         assert Film.objects.count() == 0
-        producer = Producer.objects.create(name="Ben", email="ben@gmail.com")
-        film = Film.objects.create(
-            title="The Godfather", year_published=1972, producer=producer
-        )
+        film: Film = FilmFactory()
 
         response = client.get("/films/")
 
@@ -29,24 +28,21 @@ class TestFilmViews:
         assert response.json() == [
             {
                 "id": film.id,
-                "producer": 1,
-                "title": "The Godfather",
-                "year_published": 1972,
+                "producer": film.producer.id,
+                "title": film.title,
+                "year_published": film.year_published,
             }
         ]
 
     def test_get_film_detail(self, client) -> None:
-        producer = Producer.objects.create(name="Ben", email="ben@gmail.com")
-        film = Film.objects.create(
-            title="The Godfather", year_published=1972, producer=producer
-        )
+        film: Film = FilmFactory()
 
         response = client.get(f"/films/{film.id}/")
 
         assert response.status_code == 200
         assert response.json() == {
-            "id": 1,
-            "producer": {"email": "ben@gmail.com", "id": 1, "name": "Ben"},
-            "title": "The Godfather",
-            "year_published": 1972,
+            "id": film.id,
+            "producer": {"id": film.producer.id, "email": film.producer.email, "name": film.producer.name},
+            "title": film.title,
+            "year_published": film.year_published,
         }
