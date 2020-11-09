@@ -9,6 +9,6 @@ class FilmFactory(DjangoModelFactory):
     class Meta:
         model = Film
 
-    title = "Harry Potter"
+    title = factory.Sequence(lambda n: "Film %d" % n)
     year_published = 1992
     producer = factory.SubFactory(ProducerFactory)

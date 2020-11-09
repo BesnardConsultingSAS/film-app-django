@@ -42,7 +42,11 @@ class TestFilmViews:
         assert response.status_code == 200
         assert response.json() == {
             "id": film.id,
-            "producer": {"id": film.producer.id, "email": film.producer.email, "name": film.producer.name},
+            "producer": {
+                "id": film.producer.id,
+                "email": film.producer.email,
+                "name": film.producer.name,
+            },
             "title": film.title,
             "year_published": film.year_published,
         }
